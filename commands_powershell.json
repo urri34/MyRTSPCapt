@@ -16,7 +16,7 @@
     "EntityName": "WinTV_Stop_8888_PS",
     "Type": "PowershellCommand",
     "EntityType": "button",
-    "Command": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.bat;python MyRTSPCapt.py -o stop -l 300 -i 8.8.8.8",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.ps1;python MyRTSPCapt.py -o stop -l 300 -i 8.8.8.8",
     "KeyCode": 0,
     "RunAsLowIntegrity": false,
     "Keys": []
@@ -27,7 +27,7 @@
     "EntityName": "WinTV_CaptFE_8888_PS",
     "Type": "PowershellCommand",
     "EntityType": "button",
-    "Command": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.bat;python MyRTSPCapt.py -u user -p password -o forever -l 300 -i 8.8.8.8",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.ps1;python MyRTSPCapt.py -u user -p password -o forever -l 300 -i 8.8.8.8",
     "KeyCode": 0,
     "RunAsLowIntegrity": false,
     "Keys": []

@@ -85,4 +85,11 @@ In both cases you will need also to specify:
 
 --order/-o [1shot/forever/stop] (how much do you wantto capture? just one shot? forever? or tell it to stop if it was capturing that source?)
 
---lenght/-l <secs>
+--lenght/-l <secs> (how long do you want it to save if its 1shot or how long it take toevery file if its a forever)
+
+## MyRTSPStatus.py:
+
+I want to know in HA if the desired streams is really being saved or not.
+
+[Hass.Agent](https://github.com/hass-agent/HASS.Agent) is the key to do that ... again :)
+

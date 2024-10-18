@@ -1,0 +1,19 @@
+[
+  {
+    "Type": "PowershellSensor",
+    "Id": "*",
+    "Name": "WinTV_8888",
+    "UpdateInterval": 30,
+    "Query": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.ps1;python.exe MyRTSPStatus.py -i 8.8.8.8",
+    "Scope": null,
+    "WindowName": "",
+    "Category": "",
+    "Counter": "",
+    "Instance": "",
+    "EntityName": "WinTV_8888",
+    "IgnoreAvailability": false,
+    "ApplyRounding": false,
+    "Round": null,
+    "AdvancedSettings": null
+  }
+]

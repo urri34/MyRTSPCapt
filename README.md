@@ -88,7 +88,7 @@ In both cases you will need also to specify:
 --lenght/-l <secs> (how long do you want it to save if its 1shot or how long it take toevery file if its a forever)
 
 ## MyRTSPStatus.py:
-
+### Idea behind:
 I want to know in HA if the desired streams is really being saved or not.
 
 [Hass.Agent](https://github.com/hass-agent/HASS.Agent) is the key to do that ... again :)
@@ -114,3 +114,19 @@ I want to know in HA if the desired streams is really being saved or not.
   }
 ```
 With this code we will have a sensor in HA that will simply said true or false about the stream 8.8.8.8 being saved.
+
+### Basic configuracion options:
+
+- MyRTSPCaptFile='MyRTSPCapt.py'
+
+The name of the file that we expect to be storing the RTSP stream
+
+- TimeLimit=20
+
+We get a process list every TimeLimit (it's somehow hard to take it from python)
+
+### Execution parameters:
+
+Just the ip of the RTSP you want to know its status:
+
+--ip/-i <ip> (The ip addres of the RTSP source, tipycaly the camera)

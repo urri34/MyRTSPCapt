@@ -93,3 +93,24 @@ I want to know in HA if the desired streams is really being saved or not.
 
 [Hass.Agent](https://github.com/hass-agent/HASS.Agent) is the key to do that ... again :)
 
+(json placed in %LocalAppData%\HASS.Agent\Client\config and named sensors.json as example)
+```
+  {
+    "Type": "PowershellSensor",
+    "Id": "*",
+    "Name": "WinTV_8888",
+    "UpdateInterval": 30,
+    "Query": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.ps1;python.exe MyRTSPStatus.py -i 8.8.8.8",
+    "Scope": null,
+    "WindowName": "",
+    "Category": "",
+    "Counter": "",
+    "Instance": "",
+    "EntityName": "WinTV_8888",
+    "IgnoreAvailability": false,
+    "ApplyRounding": false,
+    "Round": null,
+    "AdvancedSettings": null
+  }
+```
+With this code we will have a sensor in HA that will simply said true or false about the stream 8.8.8.8 being saved.

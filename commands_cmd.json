@@ -1,0 +1,35 @@
+[
+  {
+    "Id": "*",
+    "Name": "WinTV_Capt1s_8888",
+    "EntityName": "WinTV_Capt1s_8888",
+    "Type": "CustomCommand",
+    "EntityType": "button",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -u user -p password -o 1shot -l 300 -i 8.8.8.8",
+    "KeyCode": 0,
+    "RunAsLowIntegrity": false,
+    "Keys": []
+  },
+  {
+    "Id": "*",
+    "Name": "WinTV_Stop_8888",
+    "EntityName": "WinTV_Stop_8888",
+    "Type": "CustomCommand",
+    "EntityType": "button",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -o stop -l 300 -i 8.8.8.8",
+    "KeyCode": 0,
+    "RunAsLowIntegrity": false,
+    "Keys": []
+  },
+  {
+    "Id": "*",
+    "Name": "WinTV_CaptFE_8888",
+    "EntityName": "WinTV_CaptFE_8888",
+    "Type": "CustomCommand",
+    "EntityType": "button",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -u user -p password -o forever -l 300 -i 8.8.8.8",
+    "KeyCode": 0,
+    "RunAsLowIntegrity": false,
+    "Keys": []
+  }
+]

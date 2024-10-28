@@ -93,7 +93,7 @@ I want to know in HA if the desired streams is really being saved or not.
 
 [Hass.Agent](https://github.com/hass-agent/HASS.Agent) is the key to do that ... again :)
 
-(json placed in %LocalAppData%\HASS.Agent\Client\config and named sensors.json as example, you can find the full example in this repository [command.json](https://github.com/urri34/MyRTSPCapt/blob/main/sensors.json))
+(json placed in %LocalAppData%\HASS.Agent\Client\config and named sensors.json as example, you can find the full example in this repository [sensors.json](https://github.com/urri34/MyRTSPCapt/blob/main/sensors.json))
 ```
   {
     "Type": "PowershellSensor",

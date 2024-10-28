@@ -130,3 +130,15 @@ We get a process list every TimeLimit (it's somehow hard to take it from python)
 Just the ip of the RTSP you want to know its status:
 
 --ip/-i <ip> (The ip addres of the RTSP source, tipycaly the camera)
+
+## Home Assistant integration:
+
+### What I want:
+
+An easy command center where to see the cam and decide when to save and which machine use to save.
+
+![My HA Controls](https://github.com/urri34/MyRTSPCapt/blob/main/CaptureGarden.jpg)
+
+```
+
+```

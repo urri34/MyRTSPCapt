@@ -1,18 +1,20 @@
-from threading import Thread
-import cv2
-from time import time, strftime, localtime
-import psutil
-from os import path, getpid
-import argparse
-from sys import _getframe, exc_info
-from sys import path as ospath
+#!python.exe
+# -*- coding: utf-8 -*-
 from cv2_enumerate_cameras import enumerate_cameras
-from traceback import format_exception
-from pathlib import Path
-from sqlite3 import connect, Error
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
+from os import path, getpid, kill
+from pathlib import Path
+from signal import SIGTERM
+from sqlite3 import connect, Error
+from sys import _getframe, exc_info
+from threading import Thread
+from time import time, strftime, localtime
+from traceback import format_exception
+import argparse
+import cv2
+import psutil
 
-WindowVisible=False
+WindowVisible=True
 WindowWidth=640
 
 LogFile=path.join(path.dirname(path.realpath(__file__)), path.splitext(path.basename(__file__))[0]+'.log')
@@ -64,7 +66,7 @@ class RTSPVideoWriterObject(object):
         DefName=_getframe( ).f_code.co_name
         logger.debug(PID+':'+DefName+'(): Closing old video file '+str(self.FileName)+' ...')
         self.OutPutVideoFile.release()
-        if IncomingVars['Order'] == '1shot' and  ShouldIStop():
+        if IncomingVars['Order'] == '1shot' and ShouldIStop():
             logger.debug(PID+':'+DefName+'(): And closing the program')
             self.SayGoodBye()
         else:
@@ -120,29 +122,36 @@ def AmITheOnlyOne():
         if 'python' in str(proc.name()):
             logger.debug(PID+':'+DefName+'(): Python detected=["'+str(proc.name())+'"] ["'+str(proc.pid)+'"] '+str(proc.cmdline()))
             if str(proc.name()) == 'pythonw.exe' or str(proc.name()) == 'python.exe':
-                logger.debug(PID+':'+DefName+'(): Its a starter')
+                logger.debug(PID+':'+DefName+'(): Its a starter (pythonw.exe or python.exe)')
             else:
                 if Me in proc.cmdline() or '.\\'+Me in proc.cmdline():
-                    logger.debug(PID+':'+DefName+'(): Python excuting me')
+                    logger.debug(PID+':'+DefName+'(): This python process is executing a script called like Me:'+Me)
                     if str(PID) == str(proc.pid):
-                        logger.debug(PID+':'+DefName+'(): it has my PID')
+                        logger.debug(PID+':'+DefName+'(): It has my PID('+str(PID)+'), so its me, nothing to do -> Following up')
                     else:
+                        logger.debug(PID+':'+DefName+'(): Its not my PID('+str(PID)+'), lets see if saving the same thing')
                         if not 'WebCam' in IncomingVars:
+                            logger.debug(PID+':'+DefName+'(): Im not saving a Webcam, Im saving ip='+IncomingVars['Ip'])
                             if IncomingVars['Ip'] in proc.cmdline():
-                                logger.critical(PID+':'+DefName+'(): There is really another me in execution against same Ip')
-                                exit(1)
+                                logger.debug(PID+':'+DefName+'(): There is really another me in execution against same Ip, no stop as order, time updated, so exiting.')
+                                exit(0)
+                            else:
+                                logger.debug(PID+':'+DefName+'(): There is no one against same Ip -> Following up')
                         else:
+                            logger.debug(PID+':'+DefName+'(): Im a Webcam='+IncomingVars['WebCam'])
                             WFlagDetected=False
                             WFlagValue=''
                             for Value in proc.cmdline():
                                 if WFlagDetected==True:
                                     WFlagValue=Value
                                     WFlagDetected=False
-                                if Value == '-w':
+                                if Value == '-w' or Value == '--webcam':
                                     WFlagDetected=True
                             if WFlagValue == str(IncomingVars['WebCam']):
-                                logger.critical(PID+':'+DefName+'(): There is really another me in execution against same WebCam')
-                                exit(1)                                
+                                logger.debug(PID+':'+DefName+'(): There is really another me in execution against same WebCam, no stop as order, time updated, so exiting.')
+                                exit(0)
+                            else:
+                                logger.debug(PID+':'+DefName+'(): There is no one against same WebCam -> Following up')
 
 def GetWebCamsList():
     WebCams=[]
@@ -153,7 +162,7 @@ def GetWebCamsList():
 
 def InitArgParse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [--ip <ip> --username <username> --password <password>]/[--webcam <webcamid>] --order [1shot/forever/stop] --lenght <secs>",
+        usage="%(prog)s [--ip/-i <ip> --username/-u <username> --password/-p <password>]/[--webcam/-w <webcamid>] --order/-o [1shot/forever/stop] --lenght/-l <secs>",
         description="Captures RTSP streams to MP4"
     )
     parser.add_argument(
@@ -164,7 +173,7 @@ def InitArgParse() -> argparse.ArgumentParser:
     parser.add_argument('-i', '--ip', nargs='*')
     parser.add_argument('-u', '--username', nargs='*')
     parser.add_argument('-p', '--password', nargs='*')
-    parser.add_argument('-o', '--order', nargs='*')
+    parser.add_argument('-o', '--order', choices=['1shot', 'forever', 'stop'], nargs='*')
     parser.add_argument('-l', '--lenght', nargs='*')
     return parser
 
@@ -214,6 +223,17 @@ def SetIncomingVars():
         else:
             RTSPStreamLink = IncomingVars['WebCam']
     else:
+
+        if not (args.order):
+            logger.critical(PID+':'+DefName+'(): No order, add -o or --order')
+            exit(1)
+        else:
+            if str(args.order[0]) not in ['1shot', 'forever', 'stop']:
+                logger.critical(PID+':'+DefName+'(): Order must be set to 1shot or forever or stop')
+                exit(1)
+            IncomingVars['Order']=str(args.order[0])
+            logger.debug(PID+':'+DefName+'(): order='+IncomingVars['Order'])
+
         if not (args.ip):
             logger.critical(PID+':'+DefName+'(): No ip, add -i or --ip')
             exit(1)
@@ -227,39 +247,36 @@ def SetIncomingVars():
                     exit(1)
             IncomingVars['Ip']=str(args.ip[0])
             logger.debug(PID+':'+DefName+'(): Ip='+IncomingVars['Ip'])
-        if not (args.username):
-            logger.critical(PID+':'+DefName+'(): No username, add -u or --username')
+        
+        if IncomingVars['Order'] != 'stop':
+            if not (args.username):
+                logger.critical(PID+':'+DefName+'(): No username, add -u or --username')
+                exit(1)
+            else:
+                IncomingVars['UserName']=str(args.username[0])
+                logger.debug(PID+':'+DefName+'(): username='+IncomingVars['UserName'])
+
+            if not (args.password):
+                logger.critical(PID+':'+DefName+'(): No password, add -p or --password')
+                exit(1)
+            else:
+                IncomingVars['Password']=str(args.password[0])
+                logger.debug(PID+':'+DefName+'(): password='+IncomingVars['Password'])
+            RTSPStreamLink = 'rtsp://'+str(IncomingVars['UserName'])+':'+str(IncomingVars['Password'])+'@'+str(IncomingVars['Ip'])+':554/stream1'
+            logger.info(PID+':'+DefName+'(): RTSPStreamLink='+str(RTSPStreamLink))
+            IncomingVars['RTSPStreamLink'] = RTSPStreamLink
+
+    if IncomingVars['Order'] != 'stop':
+        if not (args.lenght):
+            logger.critical(PID+':'+DefName+'(): No lenght, add -l or --lenght')
             exit(1)
         else:
-            IncomingVars['UserName']=str(args.username[0])
-            logger.debug(PID+':'+DefName+'(): username='+IncomingVars['UserName'])
-        if not (args.password):
-            logger.critical(PID+':'+DefName+'(): No password, add -p or --password')
-            exit(1)
-        else:
-            IncomingVars['Password']=str(args.password[0])
-            logger.debug(PID+':'+DefName+'(): password='+IncomingVars['Password'])
-        RTSPStreamLink = 'rtsp://'+str(IncomingVars['UserName'])+':'+str(IncomingVars['Password'])+'@'+str(IncomingVars['Ip'])+':554/stream1'
-    logger.info(PID+':'+DefName+'(): RTSPStreamLink='+str(RTSPStreamLink))
-    IncomingVars['RTSPStreamLink'] = RTSPStreamLink
-    if not (args.order):
-        logger.critical(PID+':'+DefName+'(): No order, add -o or --order')
-        exit(1)
-    else:
-        if str(args.order[0]) not in ['1shot', 'forever']:
-            logger.critical(PID+':'+DefName+'(): Order must be set to 1shot or forever')
-            exit(1)
-        IncomingVars['Order']=str(args.order[0])
-        logger.debug(PID+':'+DefName+'(): order='+IncomingVars['Order'])
-    if not (args.lenght):
-        logger.critical(PID+':'+DefName+'(): No lenght, add -l or --lenght')
-        exit(1)
-    else:
-        if not str(args.lenght[0]).isdigit():
-            logger.critical(PID+':'+DefName+'(): Lenght must be set to a number "'+str(Value)+'"')
-            exit(1)
-        IncomingVars['VideoRotateSeconds']=int(args.lenght[0])
-        logger.debug(PID+':'+DefName+'(): lenght='+str(IncomingVars['VideoRotateSeconds']))        
+            if not str(args.lenght[0]).isdigit():
+                logger.critical(PID+':'+DefName+'(): Lenght must be set to a number "'+str(Value)+'"')
+                exit(1)
+            IncomingVars['VideoRotateSeconds']=int(args.lenght[0])
+            logger.debug(PID+':'+DefName+'(): lenght='+str(IncomingVars['VideoRotateSeconds']))        
+
     return IncomingVars
 
 def SetMyLogger():
@@ -357,9 +374,11 @@ def UpdateNeededDonesToTrue():
     DefName=_getframe( ).f_code.co_name
     Stop=time()
     if not 'WebCam' in IncomingVars:
-        SQLQuery='SELECT idunic,rtspsrc,pid,start,stop,done FROM main WHERE rtspsrc="'+IncomingVars['Ip']+'" AND stop<'+str(Stop)+' AND done=0;'
+        #SQLQuery='SELECT idunic,rtspsrc,pid,start,stop,done FROM main WHERE rtspsrc="'+IncomingVars['Ip']+'" AND stop<'+str(Stop)+' AND done=0;'
+        SQLQuery='SELECT idunic,rtspsrc,pid,start,stop,done FROM main WHERE rtspsrc="'+IncomingVars['Ip']+'" AND pid NOT IN ("'+str(PID)+'") AND done=0;'
     else:
-        SQLQuery='SELECT idunic,rtspsrc,pid,start,stop,done FROM main WHERE rtspsrc="WebCam'+str(IncomingVars['WebCam'])+'" AND stop<'+str(Stop)+' AND done=0;'
+        #SQLQuery='SELECT idunic,rtspsrc,pid,start,stop,done FROM main WHERE rtspsrc="WebCam'+str(IncomingVars['WebCam'])+'" AND stop<'+str(Stop)+' AND done=0;'
+        SQLQuery='SELECT idunic,rtspsrc,pid,start,stop,done FROM main WHERE rtspsrc="WebCam'+str(IncomingVars['WebCam'])+'" AND pid NOT IN ("'+str(PID)+'") AND done=0;'
     Cursor=SQLiteQuery(SQLQuery)
     LenListCursorFromFile=len(list(Cursor))
     if LenListCursorFromFile == 0:
@@ -379,31 +398,47 @@ def main():
     global logger, SQLMainCon, IncomingVars
     logger = SetMyLogger()
     logger.debug(PID+':'+DefName+'(): Logging active for me: '+str(Path(__file__).stem))
-    IncomingVars=SetIncomingVars()
     SQLitePrepare()
-    InsertPeticio()
-    AmITheOnlyOne()
-    UpdateNeededDonesToTrue()
-    if not 'WebCam' in IncomingVars:
-        VideoFileNameHeader='Stream'+IncomingVars['Ip'].split('.')[3]
+    IncomingVars=SetIncomingVars()
+
+    if IncomingVars['Order'] == 'stop':
+        if not 'WebCam' in IncomingVars:
+            SQLQuery='SELECT pid FROM main WHERE rtspsrc="'+IncomingVars['Ip']+'" AND done=0;'
+        else:
+            SQLQuery='SELECT pid FROM main WHERE rtspsrc="WebCam'+str(IncomingVars['WebCam'])+'" AND done=0;'
+        Cursor=SQLiteQuery(SQLQuery)
+        LenListCursorFromFile=len(list(Cursor))
+        if LenListCursorFromFile == 0:
+            logger.debug(PID+':'+DefName+'(): No entry to stop about this target')
+        else:
+            Cursor=SQLiteQuery(SQLQuery, 0)
+            for Row in Cursor:
+                kill(Row[0], SIGTERM)
+        pass
     else:
-        VideoFileNameHeader='Stream'+str(IncomingVars['WebCam'])
-    logger.debug(PID+':'+DefName+'(): Opening RTSP ...')
-    VideoStreamWidget = RTSPVideoWriterObject(IncomingVars['RTSPStreamLink'], VideoFileNameHeader)
-    VideoStreamWidget.ActualVideoStartTime=time()
-    logger.debug(PID+':'+DefName+'(): Starting time '+str(strftime('%Y/%m/%d %H:%M:%S', localtime(VideoStreamWidget.ActualVideoStartTime))))
-    logger.debug(PID+':'+DefName+'(): VideoRotateSeconds '+str(IncomingVars['VideoRotateSeconds']))
-    while True:
-        if time()-VideoStreamWidget.ActualVideoStartTime > IncomingVars['VideoRotateSeconds']:
-            VideoStreamWidget.RotateVideoFile()
-            VideoStreamWidget.ActualVideoStartTime = time()
-            logger.debug(PID+':'+DefName+'(): Starting time '+str(strftime('%Y/%m/%d %H:%M:%S', localtime(VideoStreamWidget.ActualVideoStartTime))))
-        try:
-            if WindowVisible:
-                VideoStreamWidget.Showframe()
-            VideoStreamWidget.SaveFrame()
-        except AttributeError:
-            pass
+        InsertPeticio()
+        AmITheOnlyOne()
+        UpdateNeededDonesToTrue()
+        if not 'WebCam' in IncomingVars:
+            VideoFileNameHeader='Stream'+IncomingVars['Ip'].split('.')[3]
+        else:
+            VideoFileNameHeader='Stream'+str(IncomingVars['WebCam'])
+        logger.debug(PID+':'+DefName+'(): Opening RTSP ...')
+        VideoStreamWidget = RTSPVideoWriterObject(IncomingVars['RTSPStreamLink'], VideoFileNameHeader)
+        VideoStreamWidget.ActualVideoStartTime=time()
+        logger.debug(PID+':'+DefName+'(): Starting time '+str(strftime('%Y/%m/%d %H:%M:%S', localtime(VideoStreamWidget.ActualVideoStartTime))))
+        logger.debug(PID+':'+DefName+'(): VideoRotateSeconds '+str(IncomingVars['VideoRotateSeconds']))
+        while True:
+            if time()-VideoStreamWidget.ActualVideoStartTime > IncomingVars['VideoRotateSeconds']:
+                VideoStreamWidget.RotateVideoFile()
+                VideoStreamWidget.ActualVideoStartTime = time()
+                logger.debug(PID+':'+DefName+'(): Starting time '+str(strftime('%Y/%m/%d %H:%M:%S', localtime(VideoStreamWidget.ActualVideoStartTime))))
+            try:
+                if WindowVisible:
+                    VideoStreamWidget.Showframe()
+                VideoStreamWidget.SaveFrame()
+            except AttributeError:
+                pass
 
 if __name__ == '__main__':
     main()

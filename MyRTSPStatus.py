@@ -1,14 +1,16 @@
-import psutil
-from os import getpid, path
-import argparse
-from sys import _getframe, exc_info, path
-from pathlib import Path
+#!python.exe
+# -*- coding: utf-8 -*-
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
+from os import getpid
+from os import getpid, path
+from pathlib import Path
 from sqlite3 import connect, Error, Binary
-from traceback import format_exception
-from os import path, getpid
+from sys import _getframe, exc_info
 from time import time
+from traceback import format_exception
+import argparse
 import pickle
+import psutil
 
 MyRTSPCaptFile='MyRTSPCapt.py'
 TimeLimit=20

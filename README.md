@@ -142,3 +142,31 @@ An easy command center where to see the cam and decide when to save and which ma
 In my case I have a switch previosly to the POE that allows me to start and stop the camera and it's the one places in the right.
 
 [You can find the full example code here](https://github.com/urri34/MyRTSPCapt/blob/main/HomeAssistantCard.yaml)
+
+## Somehow related:
+
+### Put captures together:
+
+Imagen you get 6 files of 5 minutes eachone but you want to save it just as 1 file of 30'.
+```
+Stream2-20240101103532.avi
+Stream2-20240101104032.avi
+Stream2-20240101104532.avi
+Stream2-20240101105032.avi
+Stream2-20240101105532.avi
+Stream2-20240101110032.avi
+```
+You need to install [ffmpeg](https://ffmpeg.org/)
+
+Build a file called in my case list.list
+```
+file 'Stream2-20240101103532.avi'
+file 'Stream2-20240101104032.avi'
+file 'Stream2-20240101104532.avi'
+file 'Stream2-20240101105032.avi'
+file 'Stream2-20240101105532.avi'
+file 'Stream2-20240101110032.avi'
+```
+And run the following script:
+- CMD: ```"c:\Program Files\ffmpeg\bin\ffmpeg.exe" -f concat -safe 0 -i list.list -c copy Stream2-20240101.avi```
+- PS: ```& 'C:\Program Files\ffmpeg\bin\ffmpeg.exe' -f concat -safe 0 -i list.list -c copy Stream2-20240101.avi```

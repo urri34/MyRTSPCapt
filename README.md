@@ -11,7 +11,7 @@ I want my RTSP streams comming from my local cameras to be saved to a file. As t
 
 I'm able to see my RTSP in home Assistant, so I want a button that allows me to save that RTSP to a file. In order to do that I should create a Command in Hass:
 
-(json placed in %LocalAppData%\HASS.Agent\Client\config and named commands.json as example where the garden camera is 192.168.1.2)
+(json placed in %LocalAppData%\HASS.Agent\Client\config and named commands.json as example where the garden camera is 192.168.1.2, you can find the full example in this repository [command.json](https://github.com/urri34/MyRTSPCapt/blob/main/commands_cmd.json))
 ```
   {
     "Id": "*",
@@ -55,7 +55,7 @@ In this case a button called WinTV_CaptGardenStop will appear in HA and if you c
 ```
 What if first I push the WinTV_Capt1ShotGardenStart button and then the WinTV_CaptFEGardenStart? The process associated to WinTV_CaptFEGardenStart will write down that the stream coming from 192.168.1.2 needs to be saved forever and just will die. After 300 seconds of being pushed, the process called by WinTV_Capt1ShotGardenStart, will know its time to die but will read that the stream coming from 192.168.1.2 need to be saved forever and will not die. All this information flow between processes is done thru a SQLite database generated just for this purpose.
 
-If you dont feel comfortable using cmd for running your scripts and prefer powershell, you can also find a version of commands.json to do so.
+If you dont feel comfortable using cmd for running your scripts and prefer powershell, you can also find a version of commands.json to do so [command.json](https://github.com/urri34/MyRTSPCapt/blob/main/commands_powershell.json)).
 
 ### Basic configuracion options:
 
@@ -93,7 +93,7 @@ I want to know in HA if the desired streams is really being saved or not.
 
 [Hass.Agent](https://github.com/hass-agent/HASS.Agent) is the key to do that ... again :)
 
-(json placed in %LocalAppData%\HASS.Agent\Client\config and named sensors.json as example)
+(json placed in %LocalAppData%\HASS.Agent\Client\config and named sensors.json as example, you can find the full example in this repository [command.json](https://github.com/urri34/MyRTSPCapt/blob/main/sensors.json))
 ```
   {
     "Type": "PowershellSensor",
@@ -139,6 +139,6 @@ An easy command center where to see the cam and decide when to save and which ma
 
 ![My HA Controls](https://github.com/urri34/MyRTSPCapt/blob/main/CaptureGarden.jpg)
 
-```
+In my case I have a switch previosly to the POE that allows me to start and stop the camera and it's the one places in the right.
 
-```
+[You can find the full example code here](https://github.com/urri34/MyRTSPCapt/blob/main/HomeAssistantCard.yaml)

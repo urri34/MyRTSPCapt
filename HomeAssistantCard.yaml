@@ -1,0 +1,63 @@
+type: vertical-stack
+cards:
+  - show_state: false
+    show_name: true
+    camera_view: auto
+    type: picture-entity
+    entity: camera.192_168_1_2
+    image: https://demo.home-assistant.io/stub_config/garden.png
+    name: Garden
+  - type: horizontal-stack
+    cards:
+      - type: vertical-stack
+        cards:
+          - show_name: true
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: button.winhp_captfegardentart
+            name: HP
+            icon: mdi:content-save
+          - show_name: true
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: button.winhp_captgardentop
+            name: Stop
+            icon: mdi:content-save-off
+          - type: entities
+            entities:
+              - entity: sensor.winhp_captgardenstatus
+                name: "  "
+      - type: vertical-stack
+        cards:
+          - show_name: true
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: button.wintv_captfegardentart
+            name: TV
+            icon: mdi:content-save
+          - show_name: true
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: button.wintv_captgardenstop
+            name: Stop
+            icon: mdi:content-save-off
+          - type: entities
+            entities:
+              - entity: sensor.wintv_captgardentatus
+                name: " "
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: toggle
+        name: Power
+        icon: ""
+        entity: switch.pwcamgarden_switch

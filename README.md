@@ -11,49 +11,49 @@ I want my RTSP streams comming from my local cameras to be saved to a file. As t
 
 I'm able to see my RTSP in home Assistant, so I want a button that allows me to save that RTSP to a file. In order to do that I should create a Command in Hass:
 
-(json placed in %LocalAppData%\HASS.Agent\Client\config and named commands.json as example)
+(json placed in %LocalAppData%\HASS.Agent\Client\config and named commands.json as example where the garden camera is 192.168.1.2)
 ```
   {
     "Id": "*",
-    "Name": "WinTV_Capt1s_8888",
-    "EntityName": "WinTV_Capt1s_8888",
+    "Name": "WinTV_Capt1ShotGardenStart",
+    "EntityName": "WinTV_Capt1ShotGardenStart",
     "Type": "CustomCommand",
     "EntityType": "button",
-    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -u user -p password -o 1shot -l 300 -i 8.8.8.8",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -u user -p password -o 1shot -l 300 -i 192.168.1.2",
     "KeyCode": 0,
     "RunAsLowIntegrity": false,
     "Keys": []
   }
 ```
-In this case the script is placed in c:\PythonProjects\MyRTSPCapt and python runs with dependences solved in a venv environment [notes about venv](https://docs.python.org/3/library/venv.html). A button called WinTV_Capt1s_8888 will appear in HA and if you click it it will start recording the RTSP that cames from 8.8.8.8 and stop after 300 seconds.
+In this case the script is placed in c:\PythonProjects\MyRTSPCapt and python runs with dependences solved in a venv environment [notes about venv](https://docs.python.org/3/library/venv.html). A button called WinTV_Capt1ShotGardenStart will appear in HA and if you click it it will start recording the RTSP that cames from 192.168.1.2 and stop after 300 seconds.
 ```
   {
     "Id": "*",
-    "Name": "WinTV_Stop_8888",
-    "EntityName": "WinTV_Stop_8888",
+    "Name": "WinTV_CaptGardenStop",
+    "EntityName": "WinTV_CaptGardenStop",
     "Type": "CustomCommand",
     "EntityType": "button",
-    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -o stop -l 300 -i 8.8.8.8",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -o stop -l 300 -i 192.168.1.2",
     "KeyCode": 0,
     "RunAsLowIntegrity": false,
     "Keys": []
   }
 ```
-In this case a button called WinTV_Stop_8888 will appear in HA and if you click it it will stop recording the RTSP that cames from 8.8.8.8 , but not another one, just this one.
+In this case a button called WinTV_CaptGardenStop will appear in HA and if you click it it will stop recording the RTSP that cames from 192.168.1.2, but not another one, just this one.
 ```
   {
     "Id": "*",
-    "Name": "WinTV_CaptFE_8888",
-    "EntityName": "WinTV_CaptFE_8888",
+    "Name": "WinTV_CaptFEGardenStart",
+    "EntityName": "WinTV_CaptFEGardenStart",
     "Type": "CustomCommand",
     "EntityType": "button",
-    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -u user -p password -o forever -l 300 -i 8.8.8.8",
+    "Command": "cd c:\\PythonProjects\\MyRTSPCapt && venv\\Scripts\\activate.bat && python MyRTSPCapt.py -u user -p password -o forever -l 300 -i 192.168.1.2",
     "KeyCode": 0,
     "RunAsLowIntegrity": false,
     "Keys": []
   }
 ```
-What if first I push the WinTV_Capt1s_8888 button and then the WinTV_CaptFE_8888? The process associated to WinTV_CaptFE_8888 will write down that the stream coming from 8.8.8.8 needs to be saved forever and just will die. After 300 seconds of being pushed, the process called by WinTV_Capt1s_8888, will know its time to die but will read that the stream coming from 8.8.8.8 need to be saved forever and will not die. All this information flow between processes is done thru a SQLite database generated just for this purpose.
+What if first I push the WinTV_Capt1ShotGardenStart button and then the WinTV_CaptFEGardenStart? The process associated to WinTV_CaptFEGardenStart will write down that the stream coming from 192.168.1.2 needs to be saved forever and just will die. After 300 seconds of being pushed, the process called by WinTV_Capt1ShotGardenStart, will know its time to die but will read that the stream coming from 192.168.1.2 need to be saved forever and will not die. All this information flow between processes is done thru a SQLite database generated just for this purpose.
 
 If you dont feel comfortable using cmd for running your scripts and prefer powershell, you can also find a version of commands.json to do so.
 
@@ -100,20 +100,20 @@ I want to know in HA if the desired streams is really being saved or not.
     "Id": "*",
     "Name": "WinTV_8888",
     "UpdateInterval": 30,
-    "Query": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.ps1;python.exe MyRTSPStatus.py -i 8.8.8.8",
+    "Query": "cd c:\\PythonProjects\\MyRTSPCapt;venv\\Scripts\\activate.ps1;python.exe MyRTSPStatus.py -i 192.168.1.2",
     "Scope": null,
     "WindowName": "",
     "Category": "",
     "Counter": "",
     "Instance": "",
-    "EntityName": "WinTV_8888",
+    "EntityName": "WinTV_CaptGardenStatus",
     "IgnoreAvailability": false,
     "ApplyRounding": false,
     "Round": null,
     "AdvancedSettings": null
   }
 ```
-With this code we will have a sensor in HA that will simply said true or false about the stream 8.8.8.8 being saved.
+With this code we will have a sensor in HA that will simply said true or false about the stream 192.168.1.2 being saved.
 
 ### Basic configuracion options:
 

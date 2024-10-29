@@ -12,6 +12,8 @@ I want my RTSP streams comming from my local cameras to be saved to a file. As t
 I'm able to see my RTSP in home Assistant, so I want a button that allows me to save that RTSP to a file. In order to do that I should create a Command in Hass:
 
 (json placed in %LocalAppData%\HASS.Agent\Client\config and named commands.json as example where the garden camera is 192.168.1.2, you can find the full example in this repository [command.json](https://github.com/urri34/MyRTSPCapt/blob/main/commands_cmd.json))
+
+Tip: If you change the json files in Hass.Agent, you should restart it in order to apply the changes
 ```
   {
     "Id": "*",

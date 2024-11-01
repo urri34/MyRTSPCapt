@@ -1,6 +1,6 @@
 # MyRTSPCapt
 
-Contains the python scripts I use Save to a file a RTSP stream or a webcam stream.
+Contains the python scripts I use to save to a file a RTSP stream or a webcam stream.
 
 ## MyRTSPCapt.py:
 ### Idea behind:

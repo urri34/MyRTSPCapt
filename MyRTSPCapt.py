@@ -1,6 +1,6 @@
 #!python.exe
 # -*- coding: utf-8 -*-
-from cv2_enumerate_cameras import enumerate_cameras
+from pyusbcameraindex import enumerate_usb_video_devices_windows
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 from os import path, getpid, kill
 from pathlib import Path
@@ -156,8 +156,9 @@ def AmITheOnlyOne():
 def GetWebCamsList():
     WebCams=[]
     WebCams.append([None,"Choose webcam"])
-    for camera_info in enumerate_cameras(cv2.CAP_MSMF):
-        WebCams.append([camera_info.index, camera_info.name])
+    Devices = enumerate_usb_video_devices_windows()
+    for Device in Devices:
+        WebCams.append([Device.index, Device.name])
     return WebCams
 
 def InitArgParse() -> argparse.ArgumentParser:
@@ -204,6 +205,17 @@ def SetIncomingVars():
     IncomingVars={}
     parser = InitArgParse()
     args = parser.parse_args()
+
+    if not (args.order):
+        logger.critical(PID+':'+DefName+'(): No order, add -o or --order')
+        exit(1)
+    else:
+        if str(args.order[0]) not in ['1shot', 'forever', 'stop']:
+            logger.critical(PID+':'+DefName+'(): Order must be set to 1shot or forever or stop')
+            exit(1)
+        IncomingVars['Order']=str(args.order[0])
+        logger.debug(PID+':'+DefName+'(): order='+IncomingVars['Order'])
+
     if (args.webcam):
         IncomingVars['WebCam']=args.webcam[0]
         if not IncomingVars['WebCam'].isdigit():
@@ -221,19 +233,8 @@ def SetIncomingVars():
             logger.critical(PID+':'+DefName+'(): Unable to find WebCam with id='+str(IncomingVars['WebCam']))
             exit(1)            
         else:
-            RTSPStreamLink = IncomingVars['WebCam']
+            IncomingVars['RTSPStreamLink'] = IncomingVars['WebCam']
     else:
-
-        if not (args.order):
-            logger.critical(PID+':'+DefName+'(): No order, add -o or --order')
-            exit(1)
-        else:
-            if str(args.order[0]) not in ['1shot', 'forever', 'stop']:
-                logger.critical(PID+':'+DefName+'(): Order must be set to 1shot or forever or stop')
-                exit(1)
-            IncomingVars['Order']=str(args.order[0])
-            logger.debug(PID+':'+DefName+'(): order='+IncomingVars['Order'])
-
         if not (args.ip):
             logger.critical(PID+':'+DefName+'(): No ip, add -i or --ip')
             exit(1)
@@ -247,7 +248,7 @@ def SetIncomingVars():
                     exit(1)
             IncomingVars['Ip']=str(args.ip[0])
             logger.debug(PID+':'+DefName+'(): Ip='+IncomingVars['Ip'])
-        
+
         if IncomingVars['Order'] != 'stop':
             if not (args.username):
                 logger.critical(PID+':'+DefName+'(): No username, add -u or --username')
